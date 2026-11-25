@@ -22,21 +22,19 @@ b = st.sidebar.slider("Sesgo (b)", -2.0, 2.0, -0.50)
 z = (w0 * x0) + (w1 * x1) + (w2 * x2) + b
 salida = np.tanh(z)
 
-# --- 3. Mostrar las fórmulas (Se ven como en los libros de texto) ---
+# --- 3. Mostrar las fórmulas ---
 st.latex(r"f(z) = \tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}")
 st.latex(f"z = ({w0})({x0}) + ({w1})({x1}) + ({w2})({x2}) + ({b}) = {z:.4f}")
-st.latex(f"\\text{Salida} = \\tanh({z:.4f}) = {salida:.4f}")
+st.latex(f"\\text{{Salida}} = \\tanh({z:.4f}) = {salida:.4f}")
 
 # --- 4. Gráfica de la función ---
 st.subheader("📈 Gráfica de la función Tangente Hiperbólica")
 
-# Generar datos para la línea curva
 z_vals = np.linspace(-4, 4, 100)
 a_vals = np.tanh(z_vals)
 
 fig, ax = plt.subplots()
 ax.plot(z_vals, a_vals, label='f(z) = tanh(z)', color='purple', linewidth=2)
-# Marcar el punto actual con un círculo rojo
 ax.plot(z, salida, 'ro', markersize=10, label=f'Punto actual ({z:.2f}, {salida:.2f})')
 ax.axhline(0, color='black', linewidth=1)
 ax.axvline(0, color='black', linewidth=1)
