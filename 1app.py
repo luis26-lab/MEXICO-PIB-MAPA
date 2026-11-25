@@ -1,49 +1,48 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-import json
-import urllib.request
+import numpy as np
+import matplotlib.pyplot as plt
 
-# Título de la aplicación
-st.title("🇲🇽 Mapa del PIB por Estado en México")
-st.write("Este mapa muestra cuánto dinero (PIB) genera cada estado. Los colores más oscuros indican mayor riqueza.")
+st.title("🧠 Simulador de Neurona Matemática")
+st.write("Mueve los controles para ver cómo cambian los cálculos y la función de activación.")
 
-# --- PASO 1: Crear datos de ejemplo (PIB ficticio en millones de dólares) ---
-data = {
-    'Estado': [
-        'Ciudad de México', 'Nuevo León', 'Jalisco', 'Estado de México', 
-        'Puebla', 'Yucatán', 'Querétaro', 'Chihuahua', 'Sonora', 'Veracruz'
-    ],
-    'PIB_millones': [150000, 95000, 85000, 110000, 45000, 30000, 40000, 35000, 38000, 50000]
-}
-df = pd.DataFrame(data)
+# --- 1. Controles para los alumnos ---
+st.sidebar.header("⚙️ Entradas (x)")
+x0 = st.sidebar.slider("x0", -2.0, 2.0, 0.12)
+x1 = st.sidebar.slider("x1", -2.0, 2.0, 0.93)
+x2 = st.sidebar.slider("x2", -2.0, 2.0, 0.91)
 
-# --- PASO 2: Descargar el mapa de México (GeoJSON) ---
-# Esto le dice a Python dónde están las fronteras de los estados
-url_geojson = "https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json"
-with urllib.request.urlopen(url_geojson) as response:
-    mexico_geojson = json.loads(response.read())
+st.sidebar.header("⚖️ Pesos (w)")
+w0 = st.sidebar.slider("w0", -3.0, 3.0, 0.61)
+w1 = st.sidebar.slider("w1", -3.0, 3.0, 0.07)
+w2 = st.sidebar.slider("w2", -3.0, 3.0, 2.16)
 
-# --- PASO 3: Crear el mapa dinámico con Plotly ---
-fig = px.choropleth(
-    df,
-    geojson=mexico_geojson,
-    locations='Estado',          # La columna de tu tabla que tiene los nombres
-    featureidkey="properties.name", # Cómo se llaman los estados en el mapa
-    color='PIB_millones',        # La columna que define el color
-    color_continuous_scale="Blues", # Paleta de colores (azul claro a oscuro)
-    range_color=(0, df['PIB_millones'].max()),
-    scope="north america",       # Para que el mapa se enfoque en América
-    labels={'PIB_millones': 'PIB (Millones USD)'}
-)
+b = st.sidebar.slider("Sesgo (b)", -2.0, 2.0, -0.50)
 
-# Ajustar el mapa para que se vea bonito y centrado en México
-fig.update_geos(fitbounds="locations", visible=False)
-fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+# --- 2. Cálculos matemáticos ---
+z = (w0 * x0) + (w1 * x1) + (w2 * x2) + b
+salida = np.tanh(z)
 
-# Mostrar el mapa en Streamlit
-st.plotly_chart(fig, use_container_width=True)
+# --- 3. Mostrar las fórmulas (Se ven como en los libros de texto) ---
+st.latex(r"f(z) = \tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}")
+st.latex(f"z = ({w0})({x0}) + ({w1})({x1}) + ({w2})({x2}) + ({b}) = {z:.4f}")
+st.latex(f"\\text{Salida} = \\tanh({z:.4f}) = {salida:.4f}")
 
-# --- PASO 4: Mostrar la tabla de datos debajo del mapa ---
-st.subheader("📊 Datos del PIB")
-st.dataframe(df, use_container_width=True)
+# --- 4. Gráfica de la función ---
+st.subheader("📈 Gráfica de la función Tangente Hiperbólica")
+
+# Generar datos para la línea curva
+z_vals = np.linspace(-4, 4, 100)
+a_vals = np.tanh(z_vals)
+
+fig, ax = plt.subplots()
+ax.plot(z_vals, a_vals, label='f(z) = tanh(z)', color='purple', linewidth=2)
+# Marcar el punto actual con un círculo rojo
+ax.plot(z, salida, 'ro', markersize=10, label=f'Punto actual ({z:.2f}, {salida:.2f})')
+ax.axhline(0, color='black', linewidth=1)
+ax.axvline(0, color='black', linewidth=1)
+ax.grid(True)
+ax.legend()
+ax.set_xlabel("z (Suma ponderada)")
+ax.set_ylabel("Salida (Activación)")
+
+st.pyplot(fig)
